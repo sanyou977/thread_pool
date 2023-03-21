@@ -16,7 +16,7 @@ public:
     ~ThreadPool();
 
     template<typename F, typename... Args>
-    auto enqueue(F&& fn, Args&&... args) -> std::future<decltype(fn(args...))>;
+    decltype(auto) enqueue(F&& fn, Args&&... args);
 
 private:
     std::queue<std::function<void()>> tasks;
@@ -60,7 +60,7 @@ ThreadPool::~ThreadPool() {
 }
 
 template<typename F, typename... Args>
-auto ThreadPool::enqueue(F&& fn, Args&&... args) -> std::future<decltype(fn(args...))> {
+decltype(auto) ThreadPool::enqueue(F&& fn, Args&&... args) {
     using func_type = decltype(fn(args...))();
     std::function<func_type> func { std::bind(std::forward<F>(fn), std::forward<Args>(args)...) };
     auto task { std::make_shared<std::packaged_task<func_type>>(func) };
